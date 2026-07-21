@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Site Admin — Administration</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<div class="admin-shell">
+  <%- include('../partials/admin-sidebar', { page: 'administration' }) %>
+  <div class="admin-main">
+    <h1>Administration Page Content</h1>
+
+    <form method="POST" action="/admin/administration/update">
+      <div class="panel">
+        <h2>Rules &amp; Regulations</h2>
+        <p style="color:var(--muted);">Leave a row's English field blank to remove it.</p>
+        <% content.rules.forEach(r => { %>
+          <div class="form-row">
+            <div class="field"><label>Rule (English)</label><input type="text" name="ruleEn" value="<%= r.en %>"></div>
+            <div class="field"><label>Rule (Bangla)</label><input type="text" name="ruleBn" value="<%= r.bn %>"></div>
+          </div>
+        <% }) %>
+        <% for (let i = 0; i < 3; i++) { %>
+          <div class="form-row">
+            <div class="field"><label>New Rule (English)</label><input type="text" name="ruleEn"></div>
+            <div class="field"><label>New Rule (Bangla)</label><input type="text" name="ruleBn"></div>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="panel">
+        <h2>Class Time</h2>
+        <% content.classTimes.forEach(c => { %>
+          <div class="form-row">
+            <div class="field"><label>Class (EN)</label><input type="text" name="classEn" value="<%= c.classEn %>"></div>
+            <div class="field"><label>Class (BN)</label><input type="text" name="classBn" value="<%= c.classBn %>"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Days (EN)</label><input type="text" name="daysEn" value="<%= c.daysEn %>"></div>
+            <div class="field"><label>Days (BN)</label><input type="text" name="daysBn" value="<%= c.daysBn %>"></div>
+            <div class="field"><label>Time</label><input type="text" name="time" value="<%= c.time %>"></div>
+          </div>
+          <hr>
+        <% }) %>
+        <div class="form-row">
+          <div class="field"><label>New Class (EN)</label><input type="text" name="classEn"></div>
+          <div class="field"><label>New Class (BN)</label><input type="text" name="classBn"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Days (EN)</label><input type="text" name="daysEn"></div>
+          <div class="field"><label>Days (BN)</label><input type="text" name="daysBn"></div>
+          <div class="field"><label>Time</label><input type="text" name="time"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Note</h2>
+        <div class="form-row">
+          <div class="field"><label>Note (English)</label><input type="text" name="noteEn" value="<%= content.noteEn %>"></div>
+          <div class="field"><label>Note (Bangla)</label><input type="text" name="noteBn" value="<%= content.noteBn %>"></div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn">Save Changes</button>
+    </form>
+  </div>
+</div>
+</body></html>
