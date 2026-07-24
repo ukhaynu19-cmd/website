@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Site Admin — Applications</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<div class="admin-shell">
+  <%- include('../partials/admin-sidebar', { page: 'applications' }) %>
+  <div class="admin-main">
+    <h1>Admission Applications</h1>
+
+    <div class="panel">
+      <% if (applications.length === 0) { %>
+        <p style="color:var(--muted);">No applications received yet.</p>
+      <% } else { %>
+        <table>
+          <tr>
+            <th>Student</th><th>Class</th><th>Guardian</th><th>Phone</th><th>Email</th><th>Message</th><th>Status</th><th>Actions</th>
+          </tr>
+          <% applications.forEach(a => { %>
+          <tr>
+            <td><%= a.studentName %></td>
+            <td><%= a.className %></td>
+            <td><%= a.guardianName %></td>
+            <td><%= a.phone %></td>
+            <td><%= a.email || '—' %></td>
+            <td><%= a.message || '—' %></td>
+            <td>
+              <span class="badge <%= a.status === 'New' ? 'badge-new' : 'badge-reviewed' %>"><%= a.status %></span>
+            </td>
+            <td>
+  <% if (a.status === 'New') { %>
+  <form method="POST" action="/admin/applications/mark-reviewed/<%= a._id %>" style="display:inline;">
+    <button type="submit" class="btn-small">Mark Reviewed</button>
+  </form>
+  <% } %>
+  <% if (a.status !== 'Accepted' && a.status !== 'Rejected') { %>
+  <form method="POST" action="/admin/applications/accept/<%= a._id %>" style="display:inline;" onsubmit="return confirm('Accept this application and notify the applicant by email?');">
+    <button type="submit" class="btn-small" style="background:var(--ok);color:#fff;border-color:var(--ok);">Accept</button>
+  </form>
+  <form method="POST" action="/admin/applications/reject/<%= a._id %>" style="display:inline;" onsubmit="return confirm('Reject this application and notify the applicant by email?');">
+    <button type="submit" class="btn-small btn-danger">Reject</button>
+  </form>
+  <% } %>
+  <form method="POST" action="/admin/applications/delete/<%= a._id %>" style="display:inline;" onsubmit="return confirm('Permanently delete this application?');">
+    <button type="submit" class="btn-small btn-danger">Delete</button>
+  </form>
+  <% if (!a.email) { %>
+    <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">No email — status updates won't be sent</div>
+  <% } %>
+</td>
+          </tr>
+          <% }) %>
+        </table>
+      <% } %>
+    </div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title><%= teacher.name %> — Hill Academic Care</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<%- include('partials/header') %>
+<main class="page">
+  <section class="panel" style="text-align:center;">
+    <% if (teacher.photoUrl) { %>
+      <img src="<%= teacher.photoUrl %>" alt="<%= teacher.name %>" style="width:140px;height:140px;border-radius:50%;object-fit:cover;margin:0 auto 16px;">
+    <% } else { %>
+      <div class="avatar-fallback" style="width:140px;height:140px;font-size:2.4rem;margin:0 auto 16px;"><%= teacher.name ? teacher.name.charAt(0) : '?' %></div>
+    <% } %>
+    <h1 style="margin-bottom:4px;"><%= teacher.name %></h1>
+    <p data-en="<%= teacher.designationEn %>" data-bn="<%= teacher.designationBn %>" style="color:var(--muted);"></p>
+    <p style="color:var(--clay);font-weight:600;"><%= teacher.subject %></p>
+  </section>
+
+  <% if (teacher.messageEn || teacher.messageBn) { %>
+  <section class="panel">
+    <h2 data-en="Message from the Teacher" data-bn="শিক্ষকের বার্তা"></h2>
+    <p data-en="<%= teacher.messageEn %>" data-bn="<%= teacher.messageBn %>"></p>
+  </section>
+  <% } %>
+
+  <p><a href="/academics" data-en="← Back to Academics" data-bn="← শিক্ষাক্রমে ফিরুন"></a></p>
+</main>
+<%- include('partials/footer') %>
+</body></html>
