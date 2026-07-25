@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Site Admin — Notices</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<div class="admin-shell">
+  <%- include('../partials/admin-sidebar', { page: 'notices' }) %>
+  <div class="admin-main">
+    <h1>Notices</h1>
+
+    <div class="panel">
+      <h2>Add Notice</h2>
+      <form method="POST" action="/admin/notices/add">
+        <div class="form-row">
+          <div class="field"><label>Title (English)</label><input type="text" name="titleEn" required></div>
+          <div class="field"><label>Title (Bangla)</label><input type="text" name="titleBn" required></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Body (English)</label><textarea name="bodyEn" required></textarea></div>
+          <div class="field"><label>Body (Bangla)</label><textarea name="bodyBn" required></textarea></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Date</label><input type="date" name="date" required></div>
+          <div class="field"><label>Attachment URL (optional)</label><input type="url" name="fileUrl" placeholder="https://..."></div>
+        </div>
+        <button type="submit" class="btn">Publish Notice</button>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>All Notices</h2>
+      <% if (notices.length === 0) { %>
+        <p style="color:var(--muted);">No notices yet.</p>
+      <% } else { %>
+        <table>
+          <tr><th>Title (EN)</th><th>Date</th><th>Actions</th></tr>
+          <% notices.forEach(n => { %>
+          <tr>
+            <td><%= n.titleEn %></td>
+            <td><%= n.date %></td>
+            <td>
+              <form method="POST" action="/admin/notices/delete/<%= n._id %>" style="display:inline;" onsubmit="return confirm('Delete this notice?');">
+                <button type="submit" class="btn-small btn-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+        </table>
+      <% } %>
+    </div>
+  </div>
+</div>
+</body></html>

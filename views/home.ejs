@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Hill Academic Care</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<%- include('partials/header') %>
+<main class="page">
+  <section class="hero">
+    <h1 data-en="Welcome to Hill Academic Care" data-bn="হিল একাডেমিক কেয়ারে স্বাগতম"></h1>
+    <p data-en="Committed to academic excellence and holistic growth." data-bn="একাডেমিক শ্রেষ্ঠত্ব ও সার্বিক বিকাশে প্রতিশ্রুতিবদ্ধ।"></p>
+  </section>
+
+  <section class="panel">
+    <h2 data-en="Latest Notices" data-bn="সাম্প্রতিক নোটিশ"></h2>
+    <% if (notices.length === 0) { %>
+      <p data-en="No notices yet." data-bn="এখনও কোনো নোটিশ নেই।"></p>
+    <% } else { %>
+      <ul class="notice-list">
+        <% notices.forEach(n => { %>
+          <li>
+            <a href="/notice/<%= n._id %>">
+              <span data-en="<%= n.titleEn %>" data-bn="<%= n.titleBn %>"></span>
+            </a>
+            <span class="notice-date"><%= n.date %></span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+    <a href="/notice" class="btn" data-en="View All Notices" data-bn="সব নোটিশ দেখুন"></a>
+  </section>
+
+  <section class="panel">
+    <h2 data-en="Quick Links" data-bn="দ্রুত লিংক"></h2>
+    <div class="form-row">
+      <a href="/admission" class="btn" data-en="Apply for Admission" data-bn="ভর্তির জন্য আবেদন করুন"></a>
+      <a href="<%= portalLoginUrl %>" target="_blank" rel="noopener" class="btn" data-en="Student / Teacher Login" data-bn="শিক্ষার্থী / শিক্ষক লগইন"></a>
+      <a href="/academics" class="btn" data-en="Meet Our Teachers" data-bn="আমাদের শিক্ষকদের সাথে পরিচিত হন"></a>
+    </div>
+  </section>
+</main>
+<%- include('partials/footer') %>
+</body></html>
