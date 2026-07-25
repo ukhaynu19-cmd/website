@@ -472,19 +472,37 @@ app.post('/admin/applications/delete/:id', requireSiteAdmin, async (req, res) =>
 app.post('/api/translate-batch', async (req, res) => {
   try {
     const { texts, to } = req.body;
-    const results = await Promise.all(
-      texts.map(async t => {
-        if (!t || t.trim() === '') return '';
-        try {
-          const r = await translate(t, { to });
-          return r.text;
-        } catch (innerErr) {
-          console.error('Single translation failed:', innerErr.message);
-          return t;
-        }
-      })
-    );
-    res.json({ translations: results });
+    if (!texts || texts.length === 0) return res.json({ translations: [] });
+
+    // Filter out empty strings but remember their original positions
+    const indices = [];
+    const nonEmpty = [];
+    texts.forEach((t, i) => {
+      if (t && t.trim() !== '') {
+        indices.push(i);
+        nonEmpty.push(t);
+      }
+    });
+
+    const translations = new Array(texts.length).fill('');
+
+    if (nonEmpty.length > 0) {
+      try {
+        const result = await translate(nonEmpty, { to });
+        // result is an array when input is an array
+        result.forEach((r, idx) => {
+          translations[indices[idx]] = r.text;
+        });
+      } catch (err) {
+        console.error('Batch translation failed:', err.message);
+        // fallback: fill originals back in on failure
+        nonEmpty.forEach((t, idx) => {
+          translations[indices[idx]] = t;
+        });
+      }
+    }
+
+    res.json({ translations });
   } catch (err) {
     console.error('Translate-batch route failed:', err.message);
     res.status(500).json({ error: 'Translation failed', details: err.message });
