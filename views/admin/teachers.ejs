@@ -20,6 +20,10 @@
           <div class="field"><label>Designation (Bangla)</label><input type="text" name="designationBn" placeholder="e.g. সিনিয়র শিক্ষক" required></div>
         </div>
         <div class="form-row">
+  <div class="field"><label>Greeting Message (English)</label><textarea name="messageEn" placeholder="A short welcome message from this teacher..."></textarea></div>
+  <div class="field"><label>Greeting Message (Bangla)</label><textarea name="messageBn" placeholder="শিক্ষকের পক্ষ থেকে সংক্ষিপ্ত বার্তা..."></textarea></div>
+</div>
+        <div class="form-row">
           <div class="field"><label>Photo</label><input type="file" name="photo" accept="image/*"></div>
         </div>
         <button type="submit" class="btn">Add Teacher</button>
@@ -43,10 +47,11 @@
             <td><%= t.subject %></td>
             <td><%= t.designationEn %></td>
             <td>
-              <form method="POST" action="/admin/teachers/delete/<%= t._id %>" style="display:inline;" onsubmit="return confirm('Remove this teacher?');">
-                <button type="submit" class="btn-small btn-danger">Delete</button>
-              </form>
-            </td>
+  <a href="/admin/teachers/edit/<%= t._id %>" class="btn-small">Edit</a>
+  <form method="POST" action="/admin/teachers/delete/<%= t._id %>" style="display:inline;" onsubmit="return confirm('Remove this teacher?');">
+    <button type="submit" class="btn-small btn-danger">Delete</button>
+  </form>
+</td>
           </tr>
           <% }) %>
         </table>

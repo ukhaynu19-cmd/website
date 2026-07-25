@@ -22,19 +22,19 @@
       <p data-en="Teacher profiles will be added soon." data-bn="শিক্ষকদের প্রোফাইল শীঘ্রই যুক্ত করা হবে।"></p>
     <% } else { %>
       <div class="teacher-grid">
-        <% teachers.forEach(t => { %>
-          <div class="teacher-card">
-            <% if (t.photoUrl) { %>
-              <img src="<%= t.photoUrl %>" alt="<%= t.name %>">
-            <% } else { %>
-              <div class="avatar-fallback"><%= t.name ? t.name.charAt(0) : '?' %></div>
-            <% } %>
-            <div class="t-name"><%= t.name %></div>
-            <div class="t-role" data-en="<%= t.designationEn %>" data-bn="<%= t.designationBn %>"></div>
-            <div class="t-subject"><%= t.subject %></div>
-          </div>
-        <% }) %>
-      </div>
+  <% teachers.forEach(t => { %>
+    <a href="/academics/teacher/<%= t._id %>" class="teacher-card">
+      <% if (t.photoUrl) { %>
+        <img src="<%= t.photoUrl %>" alt="<%= t.name %>">
+      <% } else { %>
+        <div class="avatar-fallback"><%= t.name ? t.name.charAt(0) : '?' %></div>
+      <% } %>
+      <div class="t-name"><%= t.name %></div>
+      <div class="t-role" data-en="<%= t.designationEn %>" data-bn="<%= t.designationBn %>"></div>
+      <div class="t-subject"><%= t.subject %></div>
+    </a>
+  <% }) %>
+</div>
     <% } %>
   </section>
 </main>

@@ -28,12 +28,26 @@
               <span class="badge <%= a.status === 'New' ? 'badge-new' : 'badge-reviewed' %>"><%= a.status %></span>
             </td>
             <td>
-              <% if (a.status === 'New') { %>
-              <form method="POST" action="/admin/applications/mark-reviewed/<%= a._id %>" style="display:inline;">
-                <button type="submit" class="btn-small">Mark Reviewed</button>
-              </form>
-              <% } %>
-            </td>
+  <% if (a.status === 'New') { %>
+  <form method="POST" action="/admin/applications/mark-reviewed/<%= a._id %>" style="display:inline;">
+    <button type="submit" class="btn-small">Mark Reviewed</button>
+  </form>
+  <% } %>
+  <% if (a.status !== 'Accepted' && a.status !== 'Rejected') { %>
+  <form method="POST" action="/admin/applications/accept/<%= a._id %>" style="display:inline;" onsubmit="return confirm('Accept this application and notify the applicant by email?');">
+    <button type="submit" class="btn-small" style="background:var(--ok);color:#fff;border-color:var(--ok);">Accept</button>
+  </form>
+  <form method="POST" action="/admin/applications/reject/<%= a._id %>" style="display:inline;" onsubmit="return confirm('Reject this application and notify the applicant by email?');">
+    <button type="submit" class="btn-small btn-danger">Reject</button>
+  </form>
+  <% } %>
+  <form method="POST" action="/admin/applications/delete/<%= a._id %>" style="display:inline;" onsubmit="return confirm('Permanently delete this application?');">
+    <button type="submit" class="btn-small btn-danger">Delete</button>
+  </form>
+  <% if (!a.email) { %>
+    <div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">No email — status updates won't be sent</div>
+  <% } %>
+</td>
           </tr>
           <% }) %>
         </table>

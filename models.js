@@ -30,7 +30,9 @@ const teacherSchema = new mongoose.Schema({
   designationEn: String,
   designationBn: String,
   subject: String,
-  photoUrl: String
+  photoUrl: String,
+  messageEn: String,
+  messageBn: String
 });
 
 const applicationSchema = new mongoose.Schema({
