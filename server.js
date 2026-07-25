@@ -61,7 +61,9 @@ async function translateBatch(texts, to) {
       results[nonEmptyIndices[i]] = data.responseData?.translatedText || text;
     } catch (err) {
       console.error('MyMemory translation failed for one text:', err.message);
-      results[nonEmptyIndices[i]] = text; // fallback to original on failure
+      const translated = data.responseData?.translatedText || text;
+const looksLikeError = translated.toUpperCase().includes('MYMEMORY WARNING') || data.responseStatus !== 200;
+results[nonEmptyIndices[i]] = looksLikeError ? text : translated; // fallback to original on failure
     }
     // Small delay to be polite to the free API and avoid rate limits
     await new Promise(resolve => setTimeout(resolve, 150));
