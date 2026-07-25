@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const path = require('path');
 const multer = require('multer');
-const nodemailer = require('nodemailer');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const { Notice, Teacher, Application, SiteAdmin, Administration } = require('./models');
@@ -33,8 +32,7 @@ const storage = new CloudinaryStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
-const translate = require('google-translate-api-x');
-
+// ---------- TRANSLATION (free MyMemory API, no key required) ----------
 async function translateBatch(texts, to) {
   const nonEmptyIndices = [];
   const nonEmptyTexts = [];
@@ -48,6 +46,8 @@ async function translateBatch(texts, to) {
   const results = new Array(texts.length).fill('');
   if (nonEmptyTexts.length === 0) return results;
 
+  // MyMemory has no batch endpoint, so we call it once per text,
+  // with a short delay between calls to stay well within its rate limits.
   for (let i = 0; i < nonEmptyTexts.length; i++) {
     const text = nonEmptyTexts[i];
     try {
@@ -61,17 +61,41 @@ async function translateBatch(texts, to) {
       results[nonEmptyIndices[i]] = data.responseData?.translatedText || text;
     } catch (err) {
       console.error('MyMemory translation failed for one text:', err.message);
-      results[nonEmptyIndices[i]] = text;
+      results[nonEmptyIndices[i]] = text; // fallback to original on failure
     }
+    // Small delay to be polite to the free API and avoid rate limits
     await new Promise(resolve => setTimeout(resolve, 150));
   }
 
   return results;
 }
+
+async function autoTranslate(enText, bnText) {
+  // If Bangla is missing but English was given, translate EN → BN
+  if (enText && enText.trim() !== '' && (!bnText || bnText.trim() === '')) {
+    try {
+      const [translated] = await translateBatch([enText], 'bn');
+      return { en: enText, bn: translated };
+    } catch (err) {
+      console.error('Translation failed:', err.message);
+      return { en: enText, bn: bnText || '' };
+    }
+  }
+  // If English is missing but Bangla was given, translate BN → EN
+  if (bnText && bnText.trim() !== '' && (!enText || enText.trim() === '')) {
+    try {
+      const [translated] = await translateBatch([bnText], 'en');
+      return { en: translated, bn: bnText };
+    } catch (err) {
+      console.error('Translation failed:', err.message);
+      return { en: enText || '', bn: bnText };
+    }
+  }
   // Both provided, or both empty — leave as-is
-// Email notification on new admission application
-// Email notification on new admission application — Gmail API via OAuth2 (avoids Render's SMTP port block)
-// Email notification on new admission application — Gmail REST API over HTTPS (bypasses Render's SMTP port block)
+  return { en: enText || '', bn: bnText || '' };
+}
+
+// ---------- EMAIL (Gmail REST API over HTTPS — bypasses Render's SMTP port block) ----------
 const { google } = require('googleapis');
 
 const oAuth2Client = new google.auth.OAuth2(
@@ -131,8 +155,6 @@ async function notifyApplicant(application, subject, message) {
     console.error('Applicant email failed:', err.message);
   }
 }
-
-
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -195,6 +217,7 @@ app.get('/academics', async (req, res) => {
     res.status(500).send('Database error');
   }
 });
+
 app.get('/academics/teacher/:id', async (req, res) => {
   try {
     const teacher = await Teacher.findById(req.params.id);
@@ -249,6 +272,19 @@ app.post('/admission/apply', async (req, res) => {
 
 app.get('/contact', (req, res) => res.render('contact', { page: 'contact' }));
 
+// ---------- LIVE JAPANESE TRANSLATION (called by lang-toggle.js) ----------
+app.post('/api/translate-batch', async (req, res) => {
+  try {
+    const { texts, to } = req.body;
+    if (!texts || texts.length === 0) return res.json({ translations: [] });
+    const translations = await translateBatch(texts, to);
+    res.json({ translations });
+  } catch (err) {
+    console.error('Translate-batch route failed:', err.message);
+    res.status(500).json({ error: 'Translation failed', details: err.message });
+  }
+});
+
 // ---------- SITE ADMIN (manages notices/teachers/applications for this public site) ----------
 app.get('/admin/login', (req, res) => res.render('admin/login', { error: null }));
 
@@ -265,6 +301,7 @@ app.post('/admin/login', async (req, res) => {
     res.status(500).send('Database error');
   }
 });
+
 app.get('/admin/administration', requireSiteAdmin, async (req, res) => {
   try {
     let content = await Administration.findOne({});
@@ -378,6 +415,7 @@ app.get('/admin/teachers', requireSiteAdmin, async (req, res) => {
     res.status(500).send('Database error');
   }
 });
+
 app.get('/admin/teachers/edit/:id', requireSiteAdmin, async (req, res) => {
   try {
     const teacher = await Teacher.findById(req.params.id);
@@ -449,7 +487,7 @@ app.post('/admin/applications/accept/:id', requireSiteAdmin, async (req, res) =>
     const application = await Application.findByIdAndUpdate(req.params.id, { status: 'Accepted' }, { new: true });
     if (application) {
       notifyApplicant(application, 'Admission Confirmed — Hill Academic Care',
-  'Congratulations! Your admission application has been accepted. Please contact our coaching center office to complete the enrollment process. Office hours: Saturday to Friday, 8:00 AM – 10:00 PM.');
+        'Congratulations! Your admission application has been accepted. Please contact our coaching center office to complete the enrollment process. Office hours: Saturday to Friday, 8:00 AM – 10:00 PM.');
     }
     res.redirect('/admin/applications');
   } catch (err) {
@@ -479,42 +517,6 @@ app.post('/admin/applications/delete/:id', requireSiteAdmin, async (req, res) =>
   }
 });
 
-async function translateBatch(texts, to) {
-  const nonEmptyIndices = [];
-  const nonEmptyTexts = [];
-  texts.forEach((t, i) => {
-    if (t && t.trim() !== '') {
-      nonEmptyIndices.push(i);
-      nonEmptyTexts.push(t);
-    }
-  });
-
-  const results = new Array(texts.length).fill('');
-  if (nonEmptyTexts.length === 0) return results;
-
-  // MyMemory has no batch endpoint, so we call it once per text,
-  // but with a short delay between calls to stay well within its rate limits.
-  for (let i = 0; i < nonEmptyTexts.length; i++) {
-    const text = nonEmptyTexts[i];
-    try {
-      const params = new URLSearchParams({
-        q: text,
-        langpair: `en|${to}`,
-        de: process.env.MYMEMORY_EMAIL || ''
-      });
-      const response = await fetch(`https://api.mymemory.translated.net/get?${params}`);
-      const data = await response.json();
-      results[nonEmptyIndices[i]] = data.responseData?.translatedText || text;
-    } catch (err) {
-      console.error('MyMemory translation failed for one text:', err.message);
-      results[nonEmptyIndices[i]] = text; // fallback to original on failure
-    }
-    // Small delay to be polite to the free API and avoid rate limits
-    await new Promise(resolve => setTimeout(resolve, 150));
-  }
-
-  return results;
-}
 // Catches errors thrown by multer/Cloudinary uploads (wrong format, too large, etc.)
 // Must be last — Express only routes errors to handlers registered after the failing route.
 app.use((err, req, res, next) => {
