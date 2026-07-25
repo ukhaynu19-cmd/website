@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Notice — Hill Academic Care</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<%- include('partials/header') %>
+<main class="page">
+  <section class="panel">
+    <p><a href="/notice" data-en="← Back to all notices" data-bn="← সব নোটিশে ফিরুন"></a></p>
+    <h2 data-en="<%= notice.titleEn %>" data-bn="<%= notice.titleBn %>"></h2>
+    <p class="notice-date"><%= notice.date %></p>
+    <p data-en="<%= notice.bodyEn %>" data-bn="<%= notice.bodyBn %>"></p>
+    <% if (notice.fileUrl) { %>
+      <p><a href="<%= notice.fileUrl %>" target="_blank" rel="noopener" class="btn" data-en="View Attachment" data-bn="সংযুক্তি দেখুন"></a></p>
+    <% } %>
+  </section>
+</main>
+<%- include('partials/footer') %>
+</body></html>

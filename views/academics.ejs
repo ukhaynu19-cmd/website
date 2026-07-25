@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Academics — Hill Academic Care</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<%- include('partials/header') %>
+<main class="page">
+  <section class="hero">
+    <h1 data-en="Academics" data-bn="শিক্ষাক্রম"></h1>
+    <p data-en="A well-rounded curriculum guided by an experienced and dedicated faculty." data-bn="অভিজ্ঞ ও নিবেদিতপ্রাণ শিক্ষকমণ্ডলীর তত্ত্বাবধানে সুসামঞ্জস্যপূর্ণ পাঠ্যক্রম।"></p>
+  </section>
+
+  <section class="panel">
+    <h2 data-en="Our Curriculum" data-bn="আমাদের পাঠ্যক্রম"></h2>
+    <p data-en="We follow the national curriculum from Class Six through Class Ten, with dedicated attention to core subjects including Bangla, English, Mathematics, Science, and Social Studies, alongside co-curricular activities."
+       data-bn="আমরা ষষ্ঠ শ্রেণি থেকে দশম শ্রেণি পর্যন্ত জাতীয় পাঠ্যক্রম অনুসরণ করি, যেখানে বাংলা, ইংরেজি, গণিত, বিজ্ঞান ও সমাজবিজ্ঞানের মতো মূল বিষয়গুলোর পাশাপাশি সহশিক্ষা কার্যক্রমের প্রতি বিশেষ গুরুত্ব দেওয়া হয়।"></p>
+  </section>
+
+  <section class="panel">
+    <h2 data-en="Our Teachers" data-bn="আমাদের শিক্ষকবৃন্দ"></h2>
+    <% if (teachers.length === 0) { %>
+      <p data-en="Teacher profiles will be added soon." data-bn="শিক্ষকদের প্রোফাইল শীঘ্রই যুক্ত করা হবে।"></p>
+    <% } else { %>
+      <div class="teacher-grid">
+  <% teachers.forEach(t => { %>
+    <a href="/academics/teacher/<%= t._id %>" class="teacher-card">
+      <% if (t.photoUrl) { %>
+        <img src="<%= t.photoUrl %>" alt="<%= t.name %>">
+      <% } else { %>
+        <div class="avatar-fallback"><%= t.name ? t.name.charAt(0) : '?' %></div>
+      <% } %>
+      <div class="t-name"><%= t.name %></div>
+      <div class="t-role" data-en="<%= t.designationEn %>" data-bn="<%= t.designationBn %>"></div>
+      <div class="t-subject"><%= t.subject %></div>
+    </a>
+  <% }) %>
+</div>
+    <% } %>
+  </section>
+</main>
+<%- include('partials/footer') %>
+</body></html>
